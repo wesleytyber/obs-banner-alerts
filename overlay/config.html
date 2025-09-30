@@ -4,159 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Overlay Twitch Alerts Config</title>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            font-family: Arial;
-            gap: 20px;
-            background: #111;
-            color: #fff;
-            margin: 0;
-        }
-
-        #main-container {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            gap: 20px;
-            padding: 20px;
-        }
-
-        #overlay {
-            flex: 1;
-            padding: 20px;
-        }
-
-        .alert-box {
-            margin-left: auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-radius: 2px;
-            padding: 0 15px;
-            margin-bottom: 10px;
-            transition: all 0.3s ease;
-            background: rgba(0, 0, 0, 1);
-            width: 400px;
-            height: 60px;
-        }
-
-        .text-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 16px;
-        }
-
-        .image-container video {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .banner-left {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .right-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-        }
-
-        #amount-container {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            border: 3px solid #f0d90c;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #f0d90c;
-            font-weight: bold;
-            background: rgba(0, 0, 0, 0.5);
-            box-shadow: 0 0 5px #f0d90c;
-        }
-
-        #progress-container {
-            width: 100px;
-            height: 12px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 6px;
-            overflow: hidden;
-            display: none;
-        }
-
-        #progress-bar {
-            height: 100%;
-            width: 0%;
-            border-radius: 6px;
-            background: #f0d90c;
-            transition: width 0.5s;
-        }
-
-        #progress-text {
-            font-size: 10px;
-            color: #f0d90c;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        #config-panel {
-            flex: 1;
-            background: #1c1c1c;
-            padding: 0 15px;
-            border-radius: 10px;
-            max-height: 95vh;
-            overflow-y: auto;
-        }
-
-        .saveButton {
-            margin-top: 20px;
-        }
-
-        .config-field {
-            display: flex;
-            width: 400px;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 8px;
-        }
-
-        .config-field label {
-            flex: 1;
-            margin-right: 10px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .config-field input,
-        .config-field textarea {
-            flex: 1;
-            max-width: 200px;
-            padding: 4px 8px;
-            border: 1px solid #444;
-            border-radius: 5px;
-            background: #222;
-            color: #fff;
-        }
-
-        textarea {
-            resize: vertical;
-        }
-
-        #event-configs {
-            width: 400px;
-        }
-    </style>
+    <link rel="stylesheet" href="./css/config.css">
 </head>
 
 <body>
@@ -193,6 +41,54 @@
             follow: "👥 Follow"
         };
 
+        const defaultConfigs = {
+            goal_begin: {
+                name: "META INICIADA",
+                description: "Meta de inscritos",
+                videoUrl: "https://static-cdn.jtvnw.net/default-alert-asset/v1/video/GoalStarted.webm"
+            },
+            goal_progress: {
+                name: "PROGRESSO DA META",
+                description: "Meta de inscritos",
+                videoUrl: "https://static-cdn.jtvnw.net/default-alert-asset/v1/video/GoalStarted.webm"
+            },
+            goal_end: {
+                name: "META FINALIZADA",
+                description: "Meta de inscritos",
+                videoUrl: "https://static-cdn.jtvnw.net/default-alert-asset/v1/video/GoalStarted.webm"
+            },
+            sub: {
+                name: "NOVA INSCRIÇÃO",
+                username: "Usuário",
+                videoUrl: "https://static-cdn.jtvnw.net/default-alert-asset/v1/video/FirstTimeSub.webm",
+                amountType: "Meses"
+            },
+            sub_gift: {
+                name: "SUB DE PRESENTE",
+                username: "Usuário",
+                videoUrl: "https://static-cdn.jtvnw.net/default-alert-asset/v1/video/SmallCommunityGift.webm",
+                amountType: "Quantidade"
+            },
+            bits: {
+                name: "ENVIOU BITS",
+                username: "Usuário",
+                videoUrl: "https://static-cdn.jtvnw.net/default-alert-asset/v1/video/Cheering100Bits.webm",
+                amountType: "Quantidade"
+            },
+            raid: {
+                name: "NOVA RAID",
+                username: "Usuário",
+                videoUrl: "https://static-cdn.jtvnw.net/default-alert-asset/v1/video/Raid.webm",
+                amountType: "Espectadores"
+            },
+            follow: {
+                name: "NOVO SEGUIDOR",
+                username: "Usuário",
+                videoUrl: "https://static-cdn.jtvnw.net/default-alert-asset/v1/video/Follow.webm",
+                amountType: "Seguidores"
+            }
+        };
+
         const showProgressEvents = ["goal_begin", "goal_progress", "goal_end", "follow"];
         let configs = JSON.parse(localStorage.getItem("alertConfigs") || "{}");
 
@@ -200,7 +96,7 @@
         const eventConfigsContainer = document.getElementById("event-configs");
 
         Object.keys(events).forEach(ev => {
-            if (!configs[ev]) configs[ev] = {};
+            configs[ev] = { ...defaultConfigs[ev], ...(configs[ev] || {}) };
 
             // Overlay
             const box = document.createElement("div");
@@ -214,7 +110,7 @@
                 </video>
             </div>
             <div class="banner-left">
-                <span class="event-type">${events[ev]}</span>
+                <span class="event-type">${configs[ev]}</span>
                 <span class="username-container">Usuário</span>
             </div>
         </div>
@@ -251,6 +147,7 @@
                 { key: "videoUrl", label: "Vídeo/Imagem URL", type: "text" }
             ];
 
+
             fields.forEach(f => {
                 const fieldDiv = document.createElement("div");
                 fieldDiv.className = "config-field";
@@ -269,8 +166,6 @@
                 fieldDiv.appendChild(input);
                 fs.appendChild(fieldDiv);
             });
-
-
 
             eventConfigsContainer.appendChild(fs);
             applyConfig(ev);
@@ -295,7 +190,7 @@
             const eventTypeEl = box.querySelector(".event-type");
             eventTypeEl.style.color = c.eventTypeColor || "#fff";
             eventTypeEl.style.fontSize = (c.eventTypeSize || 12) + "px";
-            eventTypeEl.textContent = c.eventTypeText || events[evKey];
+            eventTypeEl.textContent = c.eventTypeText || c.name || events[evKey];
 
             const usernameEl = box.querySelector(".username-container");
             usernameEl.style.color = c.usernameColor || "#fff";
@@ -315,7 +210,7 @@
                 progressContainerEl.style.display = "block";
                 progressBarEl.style.backgroundColor = c.progressBarColor || "#f0d90c";
                 progressTextEl.style.color = c.progressTextColor || "#f0d90c";
-                const current = c.currentAmount || 0;
+                const current = c.currentAmount || 5;
                 const target = c.targetAmount || 10;
                 const percent = Math.min(100, (current / target) * 100);
                 progressBarEl.style.width = percent + "%";
@@ -349,7 +244,7 @@
                 })
                 .catch(err => console.error(err));
         }
-        // Supondo que seu overlay estará em http://localhost:3000/overlay.html
+
         const overlayInput = document.getElementById("overlay-url");
         const copyBtn = document.getElementById("copy-overlay-url");
         const openBtn = document.getElementById("open-overlay");
