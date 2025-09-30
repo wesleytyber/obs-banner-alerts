@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Overlay Twitch Alerts</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <link rel="stylesheet" href="css/overlay.css">
+    <style>
+        #alert-box {
+            transition: all .2s ease;
+            overflow: hidden;
+        }
+
+        #progress-container {
+            display: none;
+            height: 14px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+        }
+
+        #progress-bar {
+            height: 100%;
+            width: 0%;
+            border-radius: 8px;
+            background: #f0d90c;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="alert-box" class="banner">
+        <div class="text-container">
+            <div class="image-container">
+                <video id="main-image" autoplay muted loop>
+                    <source id="main-video-source" src="" type="video/webm">
+                </video>
+            </div>
+            <div class="banner-left">
+                <span id="event-type">EVENTO</span>
+                <span id="username-container">STINGER ROY</span>
+            </div>
+        </div>
+
+        <div class="right-container">
+            <span class="right-label" id="amount-type"></span>
+            <div id="amount-container"></div>
+
+            <span id="progress-text"></span>
+            <div id="progress-container">
+                <div id="progress-bar"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const socket = io("http://localhost:3000");
+        const alertBox = document.getElementById("alert-box");
+        const eventType = document.getElementById("event-type");
+        const amountType = document.getElementById("amount-type");
+        const username = document.getElementById("username-container");
+        const mainVideoSource = document.getElementById("main-video-source");
+        const amountContainer = document.getElementById("amount-container");
+        const progressContainer = document.getElementById("progress-container");
+        const progressBar = document.getElementById("progress-bar");
+        const progressText = document.getElementById("progress-text");
+
+        const typeMap = {
+            "subscription": "goal_progress",
+            "follower": "follow",
+            "channel.goal.begin": "goal_begin",
+            "channel.goal.progress": "goal_progress",
+            "channel.goal.end": "goal_end",
+            "channel.subscribe": "sub",
+            "channel.cheer": "bits",
+            "channel.raid": "raid",
+            "channel.subgift": "sub_gift"
+        };
+
+        let configs = {};               // configs vindas do servidor
+        let currentGoalEvent = null;    // meta atual exibida
+        let temporaryTimeout = null;
+        let lastShownType = null;       // qual tipo estamos mostrando agora
+        const seenGoals = new Map();    // map id -> { ended: boolean, ts }
+
+        // limpa entradas antigas após 10 minutos
+        function cleanupSeenGoals() {
+            const now = Date.now();
+            for (const [id, info] of seenGoals) {
+                if (now - info.ts > 10 * 60 * 1000) seenGoals.delete(id);
+            }
+        }
+        setInterval(cleanupSeenGoals, 60 * 1000);
+
+        function handleEvent(event) {
+            console.log("handleEvent recebido:", event);
+
+            const goalTypes = ['new_subscription_count', 'goal_begin', 'goal_progress', 'goal_end'];
+            // se for evento de meta (a Twitch envia type: 'new_subscription_count')
+            if (goalTypes.includes(event.type)) {
+                // dedupe: se já vimos esse id como finalizado e agora veio sem ended_at, ignorar
+                if (event.id && seenGoals.has(event.id)) {
+                    const info = seenGoals.get(event.id);
+                    if (info.ended && !event.ended_at) {
+                        console.log("Ignorando evento de meta com mesmo id já finalizado:", event.id);
+                        return;
+                    }
+                }
+
+                // se veio ended_at => marcar como finalizada
+                if (event.ended_at) {
+                    // marcamso como ended (para evitar replays posteriores)
+                    if (event.id) seenGoals.set(event.id, { ended: true, ts: Date.now() });
+                }
+
+                // atualiza meta atual e renderiza
+                currentGoalEvent = event;
+                renderEvent(currentGoalEvent);
+                return;
+            }
+
+            // eventos temporários (follow, sub, bits, raid...)
+            renderEvent(event);
+            if (temporaryTimeout) clearTimeout(temporaryTimeout);
+            temporaryTimeout = setTimeout(() => {
+                if (currentGoalEvent) renderEvent(currentGoalEvent);
+            }, 5000);
+        }
+
+        // aplica config para o tipo (usa configs recebido do servidor)
+        function applyOverlayConfig(eventKey) {
+            if (!configs) configs = {};
+            if (!configs[eventKey]) configs[eventKey] = {}; // fallback
+
+            const c = configs[eventKey] || {};
+            const box = document.getElementById("alert-box");
+            if (!box) return;
+
+            const toNum = (v, fallback) => {
+                if (v === undefined || v === null || v === "") return fallback;
+                const n = parseInt(v, 10);
+                return isNaN(n) ? fallback : n;
+            };
+
+            // estilos do container
+            box.style.backgroundColor = c.bgColor || "#000";
+            box.style.width = (toNum(c.cardWidth, 600)) + "px";
+            box.style.height = (toNum(c.cardHeight, 150)) + "px";
+
+            // event-type
+            const eventTypeEl = box.querySelector("#event-type");
+            if (eventTypeEl) {
+                eventTypeEl.style.color = c.eventTypeColor || "#fff";
+                eventTypeEl.style.fontSize = (toNum(c.eventTypeSize, 24)) + "px";
+                if (c.eventTypeText) eventTypeEl.textContent = c.eventTypeText;
+            }
+
+            // username (só estilo, nunca texto)
+            const usernameEl = box.querySelector("#username-container");
+            if (usernameEl) {
+                usernameEl.style.color = c.usernameColor || "#fff";
+                usernameEl.style.fontSize = (toNum(c.usernameSize, 24)) + "px";
+            }
+
+            // amount-type
+            const amountTypeEl = box.querySelector("#amount-type");
+            if (amountTypeEl) {
+                amountTypeEl.style.color = c.amountTypeColor || "#f0d90c";
+                amountTypeEl.style.fontSize = (toNum(c.amountTypeSize, 18)) + "px";
+            }
+
+            // progress bar e texto
+            const progressBarEl = box.querySelector("#progress-bar");
+            const progressTextEl = box.querySelector("#progress-text");
+            if (progressBarEl) progressBarEl.style.backgroundColor = c.progressBarColor || "#f0d90c";
+            if (progressTextEl) {
+                progressTextEl.style.color = c.progressTextColor || "#f0d90c";
+                progressTextEl.style.fontSize = (toNum(c.progressTextSize, 10)) + "px";
+            }
+
+            // vídeo / gif
+            if (c.videoUrl) {
+                const mainVideo = box.querySelector("#main-video-source");
+                if (mainVideo) {
+                    mainVideo.src = c.videoUrl;
+                    box.querySelector("#main-image").load();
+                }
+            }
+            console.log("applyOverlayConfig ->", eventKey, c);
+        }
+
+        function renderEvent(event) {
+            const box = document.getElementById("alert-box");
+            const eventTypeEl = document.getElementById("event-type");
+            const usernameEl = document.getElementById("username-container");
+            const amountTypeEl = document.getElementById("amount-type");
+            const amountContainer = document.getElementById("amount-container");
+            const progressContainer = document.getElementById("progress-container");
+            const progressBar = document.getElementById("progress-bar");
+            const progressText = document.getElementById("progress-text");
+            const mainVideo = document.getElementById("main-video-source");
+
+            // Reset visual
+            amountContainer.style.display = "none";
+            amountContainer.textContent = "";
+            amountTypeEl.textContent = "";
+            progressContainer.style.display = "none";
+            progressText.textContent = "";
+
+            // Determina tipo do evento
+            let type;
+            if (['new_subscription_count', 'goal_begin', 'goal_progress', 'goal_end'].includes(event.type)) {
+                if (event.ended_at || event.is_achieved) type = 'goal_end';
+                else if (!event.current_amount || event.current_amount === 0) type = 'goal_begin';
+                else type = 'goal_progress';
+            } else if (event.followed_at) type = "follow";
+            else if (event.tier && !event.is_gift) type = "sub";
+            else if (event.is_gift) type = "sub_gift";
+            else if (event.bits) type = "bits";
+            else if (event.viewers) type = "raid";
+            else type = event.type || "unknown";
+
+            lastShownType = type;
+
+            // Renderiza conteúdo primeiro (para não perder o username)
+            const e = event.event || event;
+
+            switch (type) {
+                case "goal_begin":
+                case "goal_progress":
+                case "goal_end":
+                    eventTypeEl.textContent = type === "goal_begin" ? "META INICIADA" :
+                        type === "goal_progress" ? "PROGRESSO DA META" :
+                            "META FINALIZADA";
+                    usernameEl.textContent = event.description || "Meta de inscritos";
+                    mainVideo.src = configs[type]?.videoUrl || "https://static-cdn.jtvnw.net/default-alert-asset/v1/video/GoalStarted.webm";
+                    progressContainer.style.display = "block";
+                    const percent = Math.min(100, ((event.current_amount || 0) / (event.target_amount || 1)) * 100);
+                    progressBar.style.width = percent + "%";
+                    progressText.textContent = `${event.current_amount || 0} / ${event.target_amount || 0}`;
+                    if (type === "goal_end") amountTypeEl.textContent = "OBRIGADO A TODOS!";
+                    break;
+
+                case "sub":
+                    eventTypeEl.textContent = "NOVA INSCRIÇÃO";
+                    usernameEl.textContent = e.user_name || "Usuário";
+                    amountTypeEl.textContent = "Meses";
+                    mainVideo.src = configs[type]?.videoUrl || "https://static-cdn.jtvnw.net/default-alert-asset/v1/video/FirstTimeSub.webm";
+                    if (e.cumulative_months) { amountContainer.textContent = e.cumulative_months; amountContainer.style.display = "flex"; }
+                    break;
+
+                case "sub_gift":
+                    eventTypeEl.textContent = "SUB DE PRESENTE";
+                    usernameEl.textContent = e.user_name || "Usuário";
+                    amountTypeEl.textContent = "Quantidade";
+                    mainVideo.src = configs[type]?.videoUrl || "https://static-cdn.jtvnw.net/default-alert-asset/v1/video/SmallCommunityGift.webm";
+                    if (e.total) { amountContainer.textContent = e.total; amountContainer.style.display = "flex"; }
+                    break;
+
+                case "bits":
+                    eventTypeEl.textContent = "ENVIOU BITS";
+                    usernameEl.textContent = e.user_name || "Usuário";
+                    amountTypeEl.textContent = "Quantidade";
+                    mainVideo.src = configs[type]?.videoUrl || "https://static-cdn.jtvnw.net/default-alert-asset/v1/video/Cheering100Bits.webm";
+                    amountContainer.textContent = e.bits;
+                    amountContainer.style.display = "flex";
+                    break;
+
+                case "raid":
+                    eventTypeEl.textContent = "NOVA RAID";
+                    usernameEl.textContent = e.user_name || "Usuário";
+                    amountTypeEl.textContent = "Espectadores";
+                    mainVideo.src = configs[type]?.videoUrl || "https://static-cdn.jtvnw.net/default-alert-asset/v1/video/Raid.webm";
+                    amountContainer.textContent = e.viewers;
+                    amountContainer.style.display = "flex";
+                    break;
+
+                case "follow":
+                    eventTypeEl.textContent = "NOVO SEGUIDOR";
+
+                    // Mostra username individual, se existir
+                    if (e.user_name) usernameEl.textContent = e.user_name;
+
+                    // Se houver meta (current_amount / target_amount), mostra barra
+                    if (event.current_amount !== undefined && event.target_amount !== undefined) {
+                        progressContainer.style.display = "block";
+                        const percentFollow = Math.min(100, (event.current_amount / event.target_amount) * 100);
+                        progressBar.style.width = percentFollow + "%";
+                        progressText.textContent = `${event.current_amount} / ${event.target_amount}`;
+                        amountTypeEl.textContent = "Seguidores";
+                        amountContainer.style.display = "none";
+                    } else {
+                        // Evento individual: sem progresso
+                        progressContainer.style.display = "none";
+                        progressText.textContent = "";
+                        amountTypeEl.textContent = "";
+                    }
+
+                    // Vídeo / animação
+                    mainVideo.src = configs["follow"]?.videoUrl || "https://static-cdn.jtvnw.net/default-alert-asset/v1/video/Follow.webm";
+                    break;
+
+
+                default:
+                    console.warn("Evento desconhecido:", event);
+            }
+
+            // Aplica estilo depois de definir o texto (para não sobrescrever)
+            applyOverlayConfig(type);
+
+            // Mostra overlay
+            box.classList.add("show");
+            document.getElementById("main-image").load();
+
+            console.log("renderEvent exibiu tipo:", type, "id:", event.id || "(sem id)");
+        }
+
+        // busca configs iniciais do servidor
+        fetch("/configs")
+            .then(res => res.json())
+            .then(cfg => {
+                configs = cfg || {};
+                console.log("Configs recebidas:", configs);
+                // mostra a meta atual se houver
+                if (currentGoalEvent) renderEvent(currentGoalEvent);
+                else renderEvent({ type: 'new_subscription_count', current_amount: 0, target_amount: 1 });
+            })
+            .catch(err => {
+                console.warn("Erro ao buscar /configs:", err);
+                // fallback de visualização
+                renderEvent({ type: 'new_subscription_count', current_amount: 0, target_amount: 1 });
+            });
+
+        // quando servidor notificar update de configs
+        socket.on("update-configs", cfg => {
+            configs = cfg || {};
+            console.log("update-configs recebido:", configs);
+            if (lastShownType) applyOverlayConfig(lastShownType);
+        });
+
+        // eventos reais da API
+        socket.on("twitch-event", (event) => {
+            console.log("Evento recebido:", event);
+            handleEvent(event);
+        });
+
+        // expõe para testes manuais
+        window._handleEvent = handleEvent;
+        window._configs = configs;
+    </script>
+</body>
+
+</html>

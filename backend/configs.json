@@ -1,0 +1,96 @@
+{
+  "goal_begin": {
+    "bgColor": "#292e70",
+    "cardWidth": 400,
+    "cardHeight": 60,
+    "eventTypeColor": "#eddb0c",
+    "eventTypeSize": 12,
+    "usernameColor": "#fafafa",
+    "usernameSize": "14",
+    "amountTypeColor": "#0a033f",
+    "amountTypeSize": 12,
+    "progressTextSize": 12,
+    "videoUrl": "https://static-cdn.jtvnw.net/default-alert-asset/v1/video/GoalStarted.webm",
+    "eventType": "",
+    "eventTypeText": "Meta iniciada",
+    "progressBarColor": "#4bb12f",
+    "progressTextColor": "#f5f5f5"
+  },
+  "goal_progress": {
+    "bgColor": "#502525",
+    "cardWidth": 400,
+    "cardHeight": 60,
+    "eventTypeColor": "#ecbb09",
+    "eventTypeSize": 12,
+    "usernameColor": "#ece4e4",
+    "usernameSize": 16,
+    "amountTypeColor": "#c90808",
+    "videoUrl": "https://static-cdn.jtvnw.net/default-alert-asset/v1/video/GoalStarted.webm",
+    "eventTypeText": "Progresso da meta"
+  },
+  "goal_end": {
+    "videoUrl": "https://static-cdn.jtvnw.net/default-alert-asset/v1/video/GoalStarted.webm",
+    "cardWidth": 400,
+    "cardHeight": 60,
+    "bgColor": "#16290f",
+    "eventTypeText": "Meta finalizada",
+    "eventTypeSize": 12,
+    "progressTextColor": "#e4d8d8",
+    "progressBarColor": "#eacf1f",
+    "amountTypeSize": 12,
+    "eventTypeColor": "#e2e52e",
+    "usernameSize": "14",
+    "usernameColor": "#eee8e8"
+  },
+  "sub": {
+    "videoUrl": "https://static-cdn.jtvnw.net/default-alert-asset/v1/video/GoalStarted.webm",
+    "cardWidth": 400,
+    "cardHeight": 60,
+    "eventTypeSize": 12,
+    "eventTypeText": "Novo inscrito"
+  },
+  "sub_gift": {
+    "videoUrl": "https://static-cdn.jtvnw.net/default-alert-asset/v1/video/SmallCommunityGift.webm",
+    "cardWidth": 400,
+    "cardHeight": 60,
+    "eventTypeText": "Inscrito de presente",
+    "eventTypeSize": "12",
+    "bgColor": "#710e0e",
+    "usernameSize": "14",
+    "eventTypeColor": "#000000",
+    "amountTypeColor": "#e5d41f",
+    "amountTypeSize": "14",
+    "usernameColor": "#ffffff"
+  },
+  "bits": {
+    "videoUrl": "https://static-cdn.jtvnw.net/default-alert-asset/v1/video/Cheering100Bits.webm",
+    "cardWidth": 400,
+    "cardHeight": 60,
+    "eventTypeText": "Novo inscrito",
+    "eventTypeSize": 12
+  },
+  "raid": {
+    "videoUrl": "https://static-cdn.jtvnw.net/default-alert-asset/v1/video/Raid.webm",
+    "cardWidth": 400,
+    "cardHeight": 60,
+    "bgColor": "#2a2b03",
+    "eventTypeText": "Espectadores",
+    "eventTypeSize": 12
+  },
+  "follow": {
+    "videoUrl": "https://static-cdn.jtvnw.net/default-alert-asset/v1/video/Follow.webm",
+    "bgColor": "#281b46",
+    "cardWidth": 400,
+    "cardHeight": 60,
+    "eventTypeColor": "#e11414",
+    "eventTypeSize": 12,
+    "usernameColor": "#f5f5f5",
+    "usernameSize": 14,
+    "amountTypeColor": "#f00505",
+    "progressTextSize": 12,
+    "eventTypeText": "Novo seguidor",
+    "amountTypeSize": "10",
+    "progressBarColor": "#267e25",
+    "progressTextColor": "#ffffff"
+  }
+}

@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Overlay Twitch Alerts Config</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial;
+            gap: 20px;
+            background: #111;
+            color: #fff;
+            margin: 0;
+        }
+
+        #main-container {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        #overlay {
+            flex: 1;
+            padding: 20px;
+        }
+
+        .alert-box {
+            margin-left: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 2px;
+            padding: 0 15px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+            background: rgba(0, 0, 0, 1);
+            width: 400px;
+            height: 60px;
+        }
+
+        .text-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+        }
+
+        .image-container video {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .banner-left {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .right-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        #amount-container {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 3px solid #f0d90c;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #f0d90c;
+            font-weight: bold;
+            background: rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 5px #f0d90c;
+        }
+
+        #progress-container {
+            width: 100px;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            overflow: hidden;
+            display: none;
+        }
+
+        #progress-bar {
+            height: 100%;
+            width: 0%;
+            border-radius: 6px;
+            background: #f0d90c;
+            transition: width 0.5s;
+        }
+
+        #progress-text {
+            font-size: 10px;
+            color: #f0d90c;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        #config-panel {
+            flex: 1;
+            background: #1c1c1c;
+            padding: 0 15px;
+            border-radius: 10px;
+            max-height: 95vh;
+            overflow-y: auto;
+        }
+
+        .saveButton {
+            margin-top: 20px;
+        }
+
+        .config-field {
+            display: flex;
+            width: 400px;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+        }
+
+        .config-field label {
+            flex: 1;
+            margin-right: 10px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .config-field input,
+        .config-field textarea {
+            flex: 1;
+            max-width: 200px;
+            padding: 4px 8px;
+            border: 1px solid #444;
+            border-radius: 5px;
+            background: #222;
+            color: #fff;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        #event-configs {
+            width: 400px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="main-container">
+        <div id="overlay">
+            <div id="alert-container"></div>
+        </div>
+
+        <div id="config-panel">
+            <h3>Configuração dos Cards</h3>
+
+            <div id="event-configs"></div>
+
+            <button class="saveButton" onclick="saveConfig()">💾 Salvar Configuração</button>
+
+            <div id="overlay-url-container" style="margin-top:20px;">
+                <label>Usar overlay no OBS, copie a URL:</label>
+                <input type="text" id="overlay-url" readonly style="width:80%;" />
+                <button id="copy-overlay-url">Copiar URL</button>
+                <button id="open-overlay">Abrir Overlay</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const events = {
+            goal_begin: "📊 Meta iniciada",
+            goal_progress: "📈 Progresso da meta",
+            goal_end: "🏆 Meta finalizada",
+            sub: "⭐ Novo inscrito",
+            sub_gift: "🎁 Inscrito de presente",
+            bits: "💎 Bits",
+            raid: "🚀 Raid",
+            follow: "👥 Follow"
+        };
+
+        const showProgressEvents = ["goal_begin", "goal_progress", "goal_end", "follow"];
+        let configs = JSON.parse(localStorage.getItem("alertConfigs") || "{}");
+
+        const alertContainer = document.getElementById("alert-container");
+        const eventConfigsContainer = document.getElementById("event-configs");
+
+        Object.keys(events).forEach(ev => {
+            if (!configs[ev]) configs[ev] = {};
+
+            // Overlay
+            const box = document.createElement("div");
+            box.id = `alert-${ev}`;
+            box.className = "alert-box";
+            box.innerHTML = `
+        <div class="text-container">
+            <div class="image-container">
+                <video class="main-image" autoplay muted loop>
+                    <source class="main-video-source" src="" type="video/webm">
+                </video>
+            </div>
+            <div class="banner-left">
+                <span class="event-type">${events[ev]}</span>
+                <span class="username-container">Usuário</span>
+            </div>
+        </div>
+        <div class="right-container">
+            <span class="amount-type"></span>
+            <div id="amount-container"></div>
+            <span class="progress-text"></span>
+            <div id="progress-container"><div id="progress-bar"></div></div>
+        </div>
+    `;
+            alertContainer.appendChild(box);
+
+            // Config
+            const fs = document.createElement("fieldset");
+            const lg = document.createElement("legend");
+            lg.textContent = events[ev];
+            fs.appendChild(lg);
+
+            const fields = [
+                { key: "bgColor", label: "Cor Fundo", type: "color" },
+                { key: "cardWidth", label: "Largura (px)", type: "number" },
+                { key: "cardHeight", label: "Altura (px)", type: "number" },
+                { key: "eventTypeText", label: "Texto Event Type", type: "text" },
+                { key: "eventTypeColor", label: "Cor Event Type", type: "color" },
+                { key: "eventTypeSize", label: "Tamanho Event Type", type: "number" },
+                { key: "usernameColor", label: "Cor Username", type: "color" },
+                { key: "usernameSize", label: "Tamanho Username", type: "number" },
+                { key: "amountTypeColor", label: "Cor Amount Type", type: "color" },
+                { key: "amountTypeSize", label: "Tamanho Amount Type", type: "number" },
+                ...(showProgressEvents.includes(ev) ? [
+                    { key: "progressBarColor", label: "Cor Progress Bar", type: "color" },
+                    { key: "progressTextColor", label: "Cor Progress Text", type: "color" }
+                ] : []),
+                { key: "videoUrl", label: "Vídeo/Imagem URL", type: "text" }
+            ];
+
+            fields.forEach(f => {
+                const fieldDiv = document.createElement("div");
+                fieldDiv.className = "config-field";
+
+                const label = document.createElement("label");
+                label.textContent = f.label;
+                label.htmlFor = `${ev}-${f.key}`;
+
+                const input = document.createElement(f.type === "text" ? "textarea" : "input");
+                if (f.type !== "textarea") input.type = f.type;
+                input.id = `${ev}-${f.key}`;
+                input.value = configs[ev][f.key] || "";
+                input.oninput = e => handleInputChange(e, ev, f.key);
+
+                fieldDiv.appendChild(label);
+                fieldDiv.appendChild(input);
+                fs.appendChild(fieldDiv);
+            });
+
+
+
+            eventConfigsContainer.appendChild(fs);
+            applyConfig(ev);
+        });
+
+        function handleInputChange(e, evKey, fieldKey) {
+            if (!configs[evKey]) configs[evKey] = {};   // garante namespace por evento
+            configs[evKey][fieldKey] = e.target.value;  // salva dentro do evento correto
+            console.log("Config atualizada:", configs);
+            applyConfig(evKey);
+        }
+
+        function applyConfig(evKey) {
+            const c = configs[evKey] || {};
+            const box = document.getElementById(`alert-${evKey}`);
+            if (!box) return;
+
+            box.style.backgroundColor = c.bgColor || "rgba(0,0,0,1)";
+            box.style.width = (c.cardWidth || 400) + "px";
+            box.style.height = (c.cardHeight || 60) + "px";
+
+            const eventTypeEl = box.querySelector(".event-type");
+            eventTypeEl.style.color = c.eventTypeColor || "#fff";
+            eventTypeEl.style.fontSize = (c.eventTypeSize || 12) + "px";
+            eventTypeEl.textContent = c.eventTypeText || events[evKey];
+
+            const usernameEl = box.querySelector(".username-container");
+            usernameEl.style.color = c.usernameColor || "#fff";
+            usernameEl.style.fontSize = (c.usernameSize || 14) + "px";
+
+            const amountTypeEl = box.querySelector(".amount-type");
+            amountTypeEl.style.color = c.amountTypeColor || "#f0d90c";
+            amountTypeEl.style.fontSize = (c.amountTypeSize || 12) + "px";
+
+            const progressContainerEl = box.querySelector("#progress-container");
+            const progressBarEl = box.querySelector("#progress-bar");
+            const progressTextEl = box.querySelector(".progress-text");
+            const amountContainer = box.querySelector("#amount-container");
+
+            if (showProgressEvents.includes(evKey)) {
+                amountContainer.style.display = "none";
+                progressContainerEl.style.display = "block";
+                progressBarEl.style.backgroundColor = c.progressBarColor || "#f0d90c";
+                progressTextEl.style.color = c.progressTextColor || "#f0d90c";
+                const current = c.currentAmount || 0;
+                const target = c.targetAmount || 10;
+                const percent = Math.min(100, (current / target) * 100);
+                progressBarEl.style.width = percent + "%";
+                progressTextEl.textContent = `${current} / ${target}`;
+
+                if (evKey === "follow") amountTypeEl.textContent = "Seguidores";
+
+            } else {
+                progressContainerEl.style.display = "none";
+                progressTextEl.textContent = "";
+                amountContainer.style.display = "flex";
+            }
+
+            if (c.videoUrl) {
+                const videoEl = box.querySelector(".main-video-source");
+                videoEl.src = c.videoUrl;
+                box.querySelector(".main-image").load();
+            }
+        }
+
+        function saveConfig() {
+            fetch('/configs', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(configs)
+            })
+                .then(r => r.json())
+                .then(() => {
+                    alert('✅ Configurações salvas!');
+                    localStorage.setItem("alertConfigs", JSON.stringify(configs));
+                })
+                .catch(err => console.error(err));
+        }
+        // Supondo que seu overlay estará em http://localhost:3000/overlay.html
+        const overlayInput = document.getElementById("overlay-url");
+        const copyBtn = document.getElementById("copy-overlay-url");
+        const openBtn = document.getElementById("open-overlay");
+
+        // Defina a URL real do overlay
+        const overlayURL = `${window.location.origin}/overlay.html`;
+        overlayInput.value = overlayURL;
+
+        // Copiar URL para clipboard
+        copyBtn.addEventListener("click", () => {
+            overlayInput.select();
+            overlayInput.setSelectionRange(0, 99999); // mobile
+            navigator.clipboard.writeText(overlayInput.value)
+                .then(() => alert("URL copiada!"))
+                .catch(() => alert("Falha ao copiar URL."));
+        });
+
+        // Abrir overlay em nova aba
+        openBtn.addEventListener("click", () => {
+            window.open(overlayURL, "_blank");
+        });
+    </script>
+</body>
+
+</html>

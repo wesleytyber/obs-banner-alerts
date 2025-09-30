@@ -1,0 +1,58 @@
+  :root {
+      --bg: #0f1720;
+      --panel: #0b1220;
+      --muted: #94a3b8;
+      --card: #0b1228;
+      /* --accent-twitch: #9146FF; */
+      /* --accent-youtube: #FF0000; */
+      /* --accent-tiktok: #FE2858; */
+      /* --accent-kick: #75FD46; */
+      --glass: rgba(255, 255, 255, 0.04);
+      --color-white: #ffffff;
+      --color-fill-brand: #a970ff;
+  }
+
+  body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: var(--bg);
+      color: #e6eef8;
+      height: 100vh;
+      overflow: hidden;
+  }
+
+  body.light {
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --card: #fff;
+      color: #0b1220;
+      --muted: #44516a;
+      --glass: rgba(0, 0, 0, 0.03);
+  }
+
+  .donate-page {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      height: 100vh;
+      padding: 20px;
+      background: #121212;
+      color: #fff;
+  }
+
+  .qr-code img {
+      width: 200px;
+      height: 200px;
+      margin: 20px 0;
+  }
+
+  .back-button {
+      margin-top: 20px;
+      padding: 8px 16px;
+      background: #75fd46;
+      color: #000;
+      text-decoration: none;
+      border-radius: 6px;
+  }

@@ -1,0 +1,159 @@
+ html {
+     overflow: hidden;
+ }
+
+ * {
+     font-family: 'Roboto', sans-serif;
+ }
+
+ body {
+     display: flex;
+     justify-content: center;
+     align-items: center;
+     width: 100vw;
+     height: 100vh;
+     margin: 0;
+     background: #111;
+ }
+
+ .text-container {
+     display: flex;
+     align-items: center;
+     gap: 10px;
+     font-size: 16px;
+     color: #fff;
+     text-shadow: rgba(0, 0, 0, 0.8) 1px 1px 1px;
+ }
+
+ .awsome-text-container {
+     font-size: 42px;
+     font-weight: bold;
+ }
+
+ .image-container video,
+ .image-container img {
+     width: 40px;
+     height: 40px;
+     object-fit: cover;
+     border-radius: 50%;
+ }
+
+ .banner {
+     width: 400px;
+     height: 60px;
+     background: rgba(0, 0, 0, 1);
+     border-radius: 2px;
+     display: flex;
+     justify-content: space-between;
+     align-items: center;
+     padding: 0px 15px;
+ }
+
+ .banner-left {
+     display: flex;
+     flex-direction: column;
+     justify-content: flex-start;
+     align-items: flex-start;
+ }
+
+ .banner-content {
+     display: flex;
+     flex-direction: column;
+     transition: opacity 0.5s ease-in-out;
+     opacity: 1;
+ }
+
+ #event-type {
+     font-size: 8px;
+     font-weight: bold;
+     color: rgb(240, 217, 12);
+     text-transform: uppercase;
+ }
+
+ #username-container {
+     font-size: 14px;
+     margin-top: 2px;
+     font-weight: bold;
+     color: #fff;
+ }
+
+ .right-container {
+     display: flex;
+     flex-direction: column;
+     align-items: center;
+     justify-content: center;
+     gap: 2px;
+ }
+
+ .right-label {
+     font-size: 8px;
+     font-weight: bold;
+     color: rgb(240, 217, 12);
+     text-transform: uppercase;
+ }
+
+ #amount-container {
+     width: 30px;
+     height: 30px;
+     border: 3px solid rgb(240, 217, 12);
+     border-radius: 50%;
+     display: flex;
+     justify-content: center;
+     align-items: center;
+     color: rgb(240, 217, 12);
+     font-size: 14px;
+     font-weight: bold;
+     text-align: center;
+     line-height: 1.1;
+     background: rgba(0, 0, 0, 0.5);
+     box-shadow: 0 0 5px rgb(240, 217, 12);
+ }
+
+ @font-face {
+     font-family: 'Roboto';
+     font-style: normal;
+     font-weight: 400;
+     font-display: swap;
+     src: url("https://static-cdn.jtvnw.net/alert-font/v1/roboto/v30/KFOmCnqEu92Fr1Mu4mxM.woff") format("woff");
+ }
+
+ .right-container {
+     display: flex;
+     flex-direction: column;
+     align-items: center;
+     justify-content: center;
+     gap: 4px;
+ }
+
+ .right-label {
+     font-size: 8px;
+     font-weight: bold;
+     color: rgb(240, 217, 12);
+     text-transform: uppercase;
+ }
+
+ #progress-container {
+     width: 100px;
+     height: 12px;
+     background: rgba(255, 255, 255, 0.2);
+     border-radius: 6px;
+     position: relative;
+     display: none;
+     overflow: hidden;
+ }
+
+ #progress-bar {
+     height: 100%;
+     background: rgb(240, 217, 12);
+     width: 0%;
+     border-radius: 6px;
+     transition: width 0.5s ease;
+ }
+
+ #progress-text {
+     font-size: 10px;
+     font-weight: bold;
+     text-align: center;
+     color: rgb(240, 217, 12);
+     text-transform: uppercase;
+ }

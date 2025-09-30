@@ -1,0 +1,81 @@
+{
+    "follow": {
+        "user_id": "12345678",
+        "user_login": "novoseguidor",
+        "user_name": "NovoSeguidor",
+        "followed_at": "2025-09-27T16:20:00Z"
+    },
+    "sub": {
+        "user_id": "87654321",
+        "user_login": "inscrito1",
+        "user_name": "InscritoVIP",
+        "tier": "1000",
+        "is_gift": false,
+        "cumulative_months": 5,
+        "streak_months": 3,
+        "time": "2025-09-27T16:21:00Z"
+    },
+    "sub_gift": {
+        "user_id": "33445566",
+        "user_login": "generosao",
+        "user_name": "Generosao",
+        "total": 5,
+        "cumulative_total": 12,
+        "tier": "1000",
+        "is_anonymous": false,
+        "time": "2025-09-27T16:21:30Z"
+    },
+    "cheer": {
+        "user_id": "99887766",
+        "user_login": "bitloco",
+        "user_name": "BitLoco",
+        "bits": 500,
+        "message": "Parabéns pelo conteúdo!",
+        "time": "2025-09-27T16:22:00Z"
+    },
+    "raid": {
+        "from_broadcaster_user_id": "11223344",
+        "from_broadcaster_user_login": "streamerX",
+        "from_broadcaster_user_name": "StreamerX",
+        "to_broadcaster_user_id": "55667788",
+        "to_broadcaster_user_login": "seucanal",
+        "to_broadcaster_user_name": "SeuCanal",
+        "viewers": 42,
+        "time": "2025-09-27T16:23:00Z"
+    },
+    "goal_begin": {
+        "goal_type": "goal",
+        "goal_status": "begin",
+        "description": "Help me get partner!",
+        "current_amount": 0,
+        "target_amount": 220,
+        "broadcaster_user_id": "141981764",
+        "broadcaster_user_name": "TwitchDev",
+        "broadcaster_user_login": "twitchdev",
+        "started_at": "2025-09-27T16:30:00Z"
+    },
+    "goal_progress": {
+        "goal_type": "goal",
+        "goal_status": "progress",
+        "description": "Help me get partner!",
+        "current_amount": 120,
+        "target_amount": 220,
+        "broadcaster_user_id": "141981764",
+        "broadcaster_user_name": "TwitchDev",
+        "broadcaster_user_login": "twitchdev",
+        "started_at": "2025-09-27T16:30:00Z"
+    },
+    "goal_end": {
+        "goal_type": "goal",
+        "goal_status": "end",
+        "description": "Help me get partner!",
+        "current_amount": 180,
+        "target_amount": 220,
+        "is_achieved": false,
+        "broadcaster_user_id": "141981764",
+        "broadcaster_user_name": "TwitchDev",
+        "broadcaster_user_login": "twitchdev",
+        "started_at": "2025-09-27T16:30:00Z",
+        "ended_at": "2025-09-28T16:30:00Z"
+    }
+}
