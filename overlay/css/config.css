@@ -65,6 +65,10 @@
       gap: 4px;
   }
 
+  .right-container .progress-text{
+      font-size: 12px;
+  }
+
   #amount-container {
       width: 30px;
       height: 30px;

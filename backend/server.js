@@ -132,10 +132,44 @@ app.get("/auth/callback", async (req, res) => {
       CLIENT_SECRET
     );
 
-    res.send(
-      `<h3>Assinaturas criadas para ${session.user.display_name} ✅</h3>
-       <a href="/">Voltar ao overlay</a>`
-    );
+    res.send(`
+  <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>Assinaturas Criadas</title>
+      <style>
+        body, html {
+          height: 100%;
+          margin: 0;
+          display: flex;
+          justify-content: center; /* centraliza horizontal */
+          align-items: center;     /* centraliza vertical */
+          font-family: Arial, sans-serif;
+          text-align: center;
+          background-color: #f5f5f5;
+        }
+        h3 {
+          margin-bottom: 20px;
+        }
+        a {
+          text-decoration: none;
+          color: #007bff;
+          font-weight: bold;
+        }
+        a:hover {
+          text-decoration: underline;
+        }
+      </style>
+    </head>
+    <body>
+      <div>
+        <h3>Assinaturas criadas para ${session.user.display_name} ✅</h3>
+        <a href="/config.html">Voltar ao overlay</a>
+      </div>
+    </body>
+  </html>
+`);
+
   } catch (err) {
     console.error("Erro no callback:", err);
     res.status(500).send("Erro no fluxo OAuth.");
