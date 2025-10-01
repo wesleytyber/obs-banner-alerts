@@ -194,10 +194,10 @@ app.post(
   "/twitch/eventsub",
   express.raw({ type: "application/json" }),
   (req, res) => {
-    if (!verifyTwitchSignature(req, CLIENT_SECRET)) {
-      console.warn("⚠️ Assinatura inválida recebida!");
-      return res.status(403).end();
-    }
+    // if (!verifyTwitchSignature(req, CLIENT_SECRET)) {
+    //   console.warn("⚠️ Assinatura inválida recebida!");
+    //   return res.status(403).end();
+    // }
 
     const type = req.headers["twitch-eventsub-message-type"];
     const rawBody =
